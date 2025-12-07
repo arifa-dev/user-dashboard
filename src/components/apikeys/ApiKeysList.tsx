@@ -1,93 +1,117 @@
 "use client";
+
 import { FiCopy, FiRefreshCcw, FiTrash2, FiEdit3 } from "react-icons/fi";
 import Button from "../ui/button/Button";
 import { PlusIcon } from "@/icons";
 import Link from "next/link";
-
-const apiKeys = [
-  {
-    label: "Production Web API key",
-    key: "arifa_live_********4248",
-    status: "Disabled",
-    created: "25 Jan, 2025",
-    lastUsed: "Today, 10:45 AM",
-    enabled: false,
-  },
-  {
-    label: "Production Mobile API key",
-    key: "arifa_live_********4923",
-    status: "Active",
-    created: "29 Dec, 2024",
-    lastUsed: "Today, 12:40 AM",
-    enabled: true,
-  },
-  {
-    label: "Test Web API Key",
-    key: "arifa_test_********0932",
-    status: "Active",
-    created: "12 Mar, 2024",
-    lastUsed: "Today, 11:45 PM",
-    enabled: true,
-  },
-    {
-    label: "Test Mobile API key",
-    key: "arifa_test_********4923",
-    status: "Active",
-    created: "29 Dec, 2024",
-    lastUsed: "Today, 12:40 AM",
-    enabled: true,
-  },
-];
+import { useSubscriptionApiKeyInfo } from "@/hooks/useSubscriptionApiKeyInfo";
+import { useState } from "react";
 
 export default function ApiKeysList() {
+  const { loading, error, liveKeys, testKeys, refresh } =
+    useSubscriptionApiKeyInfo();
+
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const handleCopy = (key: string) => {
+    navigator.clipboard.writeText(key);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
+
+  // Rotate API key function
+  const rotateApiKey = (key: string) => {
+    console.log("Rotate key:", key);
+    // You can replace this with actual API call later
+  };
+
+  if (loading) return <p className="text-gray-400">Loading API keys...</p>;
+  if (error)
+    return (
+      <p className="text-red-500">
+        Failed to load API keys — {error.toString()}
+      </p>
+    );
+
+  // Combine all keys
+  const allKeys = [...liveKeys, ...testKeys];
+
+  // Function to generate dynamic heading
+  const getKeyHeading = (key: typeof allKeys[0]) => {
+    const type = key.key_type.toLowerCase(); // 'live' or 'test'
+    const client = key.client.toLowerCase(); // 'web' or 'mobile'
+    const typeLabel = type === "live" ? "Production" : "Test";
+    const clientLabel = client === "mobile" ? "Mobile" : "Web";
+    return `${typeLabel} ${clientLabel} Key`;
+  };
+
   return (
     <div className="w-full rounded-xl border border-gray-200 bg-white p-4 sm:p-6 dark:border-gray-800 dark:bg-gray-900">
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           API Keys
         </h2>
-        <Link href="/generate-apikeys">
-          <Button startIcon={<PlusIcon />}>Add API Key</Button>
-        </Link>
+
+        <div className="flex items-center gap-3">
+          <Button onClick={refresh} className="flex items-center gap-2">
+            <FiRefreshCcw />
+            Refresh
+          </Button>
+
+          <Link href="/generate-apikeys">
+            <Button startIcon={<PlusIcon />}>Add API Key</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="space-y-8">
-        {apiKeys.map((item, idx) => (
+        {allKeys.length === 0 && (
+          <p className="text-gray-500 dark:text-gray-400">
+            No API keys found. Create one to get started.
+          </p>
+        )}
+
+        {allKeys.map((item, idx) => (
           <div key={idx} className="w-full">
-            {/* Label */}
+            {/* Dynamic Label */}
             <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              {item.label}
+              {getKeyHeading(item)}
             </p>
 
-            {/* Key Row (Responsive) */}
+            {/* Key Row */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-              
-              {/* Key */}
               <span className="text-gray-700 dark:text-gray-300 font-mono text-sm break-all">
-                {item.key}
+                {item.api_key}
               </span>
 
-              {/* Buttons */}
               <div className="flex flex-wrap items-center gap-3">
-                <button className="flex items-center gap-1 rounded-md border px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
-                  <FiCopy /> Copy
+                {/* COPY BUTTON */}
+                <button
+                  onClick={() => handleCopy(item.api_key)}
+                  className="flex items-center gap-1 rounded-md border px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  <FiCopy />
+                  {copiedKey === item.api_key ? "Copied!" : "Copy"}
                 </button>
 
-                <button className="rounded-md border p-2 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-700">
+                {/* ROTATE BUTTON */}
+                <button
+                  onClick={() => rotateApiKey(item.api_key)}
+                  className="rounded-md border p-2 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-700"
+                >
                   <FiRefreshCcw />
                 </button>
               </div>
             </div>
 
-            {/* Bottom Info Row (Fully Responsive) */}
+            {/* Bottom row */}
             <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-600 dark:text-gray-400">
-              
-              {/* Status + Dates */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    item.status === "Active"
+                    item.status === "active"
                       ? "bg-green-100 text-green-600"
                       : "bg-red-100 text-red-600"
                   }`}
@@ -96,20 +120,19 @@ export default function ApiKeysList() {
                 </span>
 
                 <p>
-                  Created: <span className="font-medium">{item.created}</span>
-                </p>
-                <p>
-                  Last used: <span className="font-medium">{item.lastUsed}</span>
+                  Created:{" "}
+                  <span className="font-medium">
+                    {new Date(item.created_at).toLocaleDateString()}
+                  </span>
                 </p>
               </div>
 
-              {/* Toggle + Actions */}
               <div className="flex items-center gap-4">
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
                     type="checkbox"
                     className="peer sr-only"
-                    defaultChecked={item.enabled}
+                    defaultChecked={item.status === "active"}
                   />
                   <div className="peer h-5 w-10 rounded-full bg-gray-300 peer-checked:bg-blue-600 after:absolute after:left-0 after:top-0 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5"></div>
                 </label>
@@ -124,7 +147,7 @@ export default function ApiKeysList() {
               </div>
             </div>
 
-            {idx < apiKeys.length - 1 && (
+            {idx < allKeys.length - 1 && (
               <hr className="mt-5 border-gray-200 dark:border-gray-700" />
             )}
           </div>

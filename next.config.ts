@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
         hostname: "www.w3.org",
         pathname: "/7.x/**",
       },
+
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        pathname: "/api/**",
+      },
     ],
   },
 };

@@ -1,14 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { useSearchParams } from "next/navigation";
 import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
+import { useSubscribe } from "@/hooks/useSubscribe";
 
 export default function CheckoutPage() {
+  const { subscribe, loading, error, success, invoiceId } = useSubscribe();
   const searchParams = useSearchParams();
-  const plan_name = searchParams.get("plan_name");
-  const plan_price = searchParams.get("price");
+  const plan_name = searchParams.get("plan_name") ?? "N/A";
+  const plan_price = searchParams.get("price") ?? "N/A";
+  const plan_id = searchParams.get("plan_id") ?? ""; 
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const handleSubscribe = async () => {
+    if (!phoneNumber || !plan_id) return;
+    await subscribe(phoneNumber, plan_id);
+  };
 
   return (
     <div className="space-y-8">
@@ -49,15 +60,23 @@ export default function CheckoutPage() {
             <input
               type="text"
               placeholder="254712345678"
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary focus:outline-none"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="px-4 py-2 rounded-lg border dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
 
-          <Button className="w-full">
-            Subscribe
+          <Button 
+            className="w-full" 
+            onClick={handleSubscribe} 
+            disabled={loading || !phoneNumber || !plan_id}
+          >
+            {loading ? "Processing..." : "Subscribe"}
           </Button>
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {success && <p className="text-green-500 text-sm">Subscription initiated! Invoice ID: {invoiceId}</p>}
         </div>
-      
       </ComponentCard>
     </div>
   );

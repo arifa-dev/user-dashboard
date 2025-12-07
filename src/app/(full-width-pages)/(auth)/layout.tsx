@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import logo from "../../../../public/images/logo/logo.png";
 
 export default function AuthLayout({
   children,
@@ -23,14 +24,14 @@ export default function AuthLayout({
               <div className="flex flex-col items-center max-w-xs">
                 <Link href="/" className="block mb-4">
                   <Image
-                    width={231}
+                    width={200}
                     height={48}
-                    src="./images/logo/auth-logo.svg"
+                    src={logo}
                     alt="Logo"
                   />
                 </Link>
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                  Arifa Realtime Notification Service provides instant, high-speed communication for apps that need realtime updates
                 </p>
               </div>
             </div>
