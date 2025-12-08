@@ -51,7 +51,7 @@ export default function SignUpForm() {
 
       if (data?.id) {
         // Store pending email for verification step
-        localStorage.setItem("pending_email", formData.email);
+        localStorage.setItem("pendingEmail", formData.email);
         router.push("/verify-email"); // redirect to verification page
       } else {
         setError(data?.detail || "Failed to sign up. Please try again.");
