@@ -32,13 +32,12 @@ export default function NotificationDropdown() {
           // Store incoming messages
           setNotifications((prev) => [parsed, ...prev]);
           setHasUnread(true);
-      }
 
-
-      // Play sound on new message
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
+          // Play sound on new message
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+          }
       }
     } catch (err) {
       console.error("Invalid websocket message:", err);
