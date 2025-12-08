@@ -11,7 +11,8 @@ import {
   HorizontaLDots,
   PlugInIcon,
   UserCircleIcon,
-  DocsIcon
+  DocsIcon,
+  PageIcon
 
 } from "../icons/index";
 
@@ -54,6 +55,11 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "Profile",
     path: "/profile",
+  },
+   {
+    icon: <PageIcon />,
+    name: "Documentation",
+    path: "https://notifications.arifa.dev/docs",
   }
 ];
 

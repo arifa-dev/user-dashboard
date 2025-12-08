@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiBell } from "react-icons/fi";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
@@ -20,15 +19,27 @@ export default function NotificationDropdown() {
 
   const { data, isConnected } = useWebSocket("/connect");
 
+  // Sound reference
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     if (!data) return;
 
     try {
       const parsed: Notification = JSON.parse(data);
 
-      // Add all messages
-      setNotifications((prev) => [parsed, ...prev]);
-      setHasUnread(true); // mark new message as unread
+      if (parsed.message_type === "subscription_transaction"){
+          // Store incoming messages
+          setNotifications((prev) => [parsed, ...prev]);
+          setHasUnread(true);
+      }
+
+
+      // Play sound on new message
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
     } catch (err) {
       console.error("Invalid websocket message:", err);
     }
@@ -37,14 +48,15 @@ export default function NotificationDropdown() {
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {
-      // user opened dropdown, mark notifications as read
-      setHasUnread(false);
+      setHasUnread(false); // user opened dropdown → mark as read
     }
   };
+
   const closeDropdown = () => setIsOpen(false);
 
   return (
     <div className="relative">
+      {/* 🔔 Bell Icon */}
       <button
         onClick={toggleDropdown}
         className={`relative flex items-center justify-center h-11 w-11 rounded-full border transition-colors 
@@ -58,6 +70,7 @@ export default function NotificationDropdown() {
         )}
       </button>
 
+      {/* Dropdown */}
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
@@ -77,8 +90,11 @@ export default function NotificationDropdown() {
 
         <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
           {notifications.length === 0 && (
-            <li className="text-center text-gray-400 py-4">No notifications</li>
+            <li className="text-center text-gray-400 py-4">
+              No notifications
+            </li>
           )}
+
           {notifications.map((notif, idx) => (
             <li key={idx}>
               <DropdownItem
@@ -95,14 +111,9 @@ export default function NotificationDropdown() {
             </li>
           ))}
         </ul>
-{/* 
-        <Link
-          href="/"
-          className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
-        >
-          View All Notifications
-        </Link> */}
       </Dropdown>
+
+      <audio ref={audioRef} src="/sounds/ring3.mp3" preload="auto" />
     </div>
   );
 }

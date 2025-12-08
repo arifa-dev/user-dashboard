@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = {
@@ -9,11 +9,14 @@ type JwtPayload = {
 
 export const useWebSocket = (path: string) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [data, setData] = useState<any>();
-  const reconnectRef = useRef<number | null>(null);
+  const [data, setData] = useState<any>(null);
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<number | null>(null);
+  const reconnectAttempts = useRef(0);
 
   // decode jwt using library
-  const jwt_token =  localStorage.getItem("accessToken");;
+  const jwt_token = localStorage.getItem("accessToken");
   let RECIPIENT = "";
 
   if (jwt_token) {
@@ -24,40 +27,70 @@ export const useWebSocket = (path: string) => {
     } catch (err) {
       console.error("Invalid JWT:", err);
     }
-  }
+}
+
 
   const TOKEN = "arifa_test:4e89be23CVCP";
   const CLIENT = "web";
 
-  useEffect(() => {
-    let ws: WebSocket;
-    const ws_local = "wss://notifications.arifa.dev/ws";
+  const WS_URL = "wss://notifications.arifa.dev/ws";
 
-    const connect = () => {
-      ws = new WebSocket(
-        `${ws_local}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`
-      );
+  const connect = () => {
+    const ws = new WebSocket(
+      `${WS_URL}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`
+    );
 
-      ws.onopen = () => setIsConnected(true);
+    wsRef.current = ws;
 
-      ws.onclose = () => {
-        setIsConnected(false);
-
-        if (!document.hidden) {
-          reconnectRef.current = window.setTimeout(connect, 3000);
-        }
-      };
-
-      ws.onmessage = (event) => {
-        setData(event.data);
-      };
+    ws.onopen = () => {
+      setIsConnected(true);
+      reconnectAttempts.current = 0;
     };
 
+    ws.onmessage = (event) => {
+      setData(event.data);
+    };
+
+    ws.onerror = (_) => {
+      // todo
+    };
+
+    ws.onclose = (event) => {
+
+      setIsConnected(false);
+
+      if (event.code === 4001 || event.code === 4003) {
+        return;
+      }
+
+      if (!navigator.onLine) {
+        return;
+      }
+
+      // Exponential backoff
+      const timeout = Math.min(30000, 2000 * 2 ** reconnectAttempts.current);
+      reconnectAttempts.current++;
+
+      reconnectTimer.current = window.setTimeout(() => {
+        connect();
+      }, timeout);
+    };
+  };
+
+  useEffect(() => {
     connect();
+    const handleOnline = () => {
+      connect();
+    };
+
+    window.addEventListener("online", handleOnline);
 
     return () => {
-      if (reconnectRef.current) clearTimeout(reconnectRef.current);
-      ws?.close();
+      window.removeEventListener("online", handleOnline);
+
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+
+      wsRef.current?.close();
     };
   }, [path, RECIPIENT]);
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { FiCopy, FiRefreshCcw, FiTrash2, FiEdit3 } from "react-icons/fi";
+import { FiCopy, FiRefreshCcw, FiTrash2} from "react-icons/fi";
 import Button from "../ui/button/Button";
 import { PlusIcon } from "@/icons";
 import Link from "next/link";
 import { useSubscriptionApiKeyInfo } from "@/hooks/useSubscriptionApiKeyInfo";
 import { useState } from "react";
+import { notification_api } from "@/utils/api";
 
 export default function ApiKeysList() {
   const { loading, error, liveKeys, testKeys, refresh } =
@@ -19,11 +20,24 @@ export default function ApiKeysList() {
     setTimeout(() => setCopiedKey(null), 1500);
   };
 
-  // Rotate API key function
-  const rotateApiKey = (key: string) => {
-    console.log("Rotate key:", key);
-    // You can replace this with actual API call later
+
+  const ApiKeyActions = async (key: string, action: "rotate" | "delete") => {
+      const endpoint = action === "rotate" ? `/apikey/rotate/${key}` : `/apikey/delete/${key}`;
+      const method = action === "rotate" ? "POST" : "DELETE";
+
+      try {
+        const { response, data } = await notification_api(endpoint, { method });
+        
+        if (!response.ok) {
+          throw new Error(data?.message || "API request failed");
+        }
+
+        refresh()
+      } catch (_) {
+        return 
+      }
   };
+
 
   if (loading) return <p className="text-gray-400">Loading API keys...</p>;
   if (error)
@@ -98,7 +112,7 @@ export default function ApiKeysList() {
 
                 {/* ROTATE BUTTON */}
                 <button
-                  onClick={() => rotateApiKey(item.api_key)}
+                  onClick={() => ApiKeyActions(item.api_key, "rotate")}
                   className="rounded-md border p-2 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-700"
                 >
                   <FiRefreshCcw />
@@ -137,12 +151,11 @@ export default function ApiKeysList() {
                   <div className="peer h-5 w-10 rounded-full bg-gray-300 peer-checked:bg-blue-600 after:absolute after:left-0 after:top-0 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5"></div>
                 </label>
 
-                <button className="text-gray-500 hover:text-red-500">
+                <button 
+                  className="text-gray-500 hover:text-red-500" 
+                  onClick={() => ApiKeyActions(item.api_key, "delete")}
+                >
                   <FiTrash2 size={18} />
-                </button>
-
-                <button className="text-gray-500 hover:text-blue-600">
-                  <FiEdit3 size={18} />
                 </button>
               </div>
             </div>
