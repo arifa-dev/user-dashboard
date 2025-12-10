@@ -12,7 +12,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   const normalized = status.toLowerCase();
 
   const colors: Record<string, string> = {
-    completed: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    complete: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
     failed: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
     pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
   };
@@ -95,7 +95,7 @@ export default function TransactionsTable() {
                       <TableCell
                         key={heading}
                         isHeader
-                        className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                        className="px-5 py-3 font-medium text-gray-500 text-start text-sm dark:text-gray-400"
                       >
                         {heading}
                       </TableCell>
@@ -109,7 +109,7 @@ export default function TransactionsTable() {
                       key={`${tx.id}-${index}`}
                       className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                     >
-                      <TableCell className="px-5 py-4 flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                      <TableCell className="px-5 py-4 flex items-center gap-2 text-gray-700 dark:text-gray-300 text-sm">
                         {tx.provider === "M-PESA" ? (
                           <Image src={mpesalogo} alt="MPESA" width={55} height={40} />
                         ) : (
@@ -117,15 +117,15 @@ export default function TransactionsTable() {
                         )}
                       </TableCell>
 
-                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300">
+                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300 text-sm">
                         {tx.invoice_id}
                       </TableCell>
 
-                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300">
+                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300 text-sm">
                         {tx.mpesa_reference || "N/A"}
                       </TableCell>
 
-                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300">
+                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300 text-sm">
                         {new Date(tx.start_date).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -137,13 +137,14 @@ export default function TransactionsTable() {
                         <StatusBadge status={tx.status} />
                       </TableCell>
 
-                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300">
+                      <TableCell className="px-5 py-4 text-gray-700 dark:text-gray-300 text-sm">
                         Ksh {tx.amount}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+
             )}
 
             {/* Loading more indicator */}
