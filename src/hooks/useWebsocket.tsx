@@ -15,27 +15,30 @@ export const useWebSocket = (path: string) => {
   const reconnectTimer = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
 
-  // decode jwt using library
-  const jwt_token = localStorage.getItem("accessToken");
-  let RECIPIENT = "";
-
-  if (jwt_token) {
+  // Decode JWT once, memoized
+  const RECIPIENT = useMemo(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return "";
     try {
-      const decoded = jwtDecode<JwtPayload>(jwt_token);
-      RECIPIENT = decoded.user_id;
-      console.log("RECIPIENT", RECIPIENT);
+      return jwtDecode<JwtPayload>(token).user_id;
     } catch (err) {
       console.error("Invalid JWT:", err);
+      return "";
     }
-}
-
+  }, []);
 
   const TOKEN = "arifa_test:4e89be23CVCP";
   const CLIENT = "web";
-
   const WS_URL = "wss://notifications.arifa.dev/ws";
 
+
+
   const connect = () => {
+    // Prevent multiple simultaneous connections
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+      return;
+    }
+
     const ws = new WebSocket(
       `${WS_URL}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`
     );
@@ -45,51 +48,49 @@ export const useWebSocket = (path: string) => {
     ws.onopen = () => {
       setIsConnected(true);
       reconnectAttempts.current = 0;
+      console.log("WebSocket connected");
     };
 
     ws.onmessage = (event) => {
       setData(event.data);
     };
 
-    ws.onerror = (_) => {
-      // todo
+    ws.onerror = (err) => {
+      // pass
     };
 
     ws.onclose = (event) => {
-
       setIsConnected(false);
+      console.log(`WebSocket closed: ${event.code}`);
 
-      if (event.code === 4001 || event.code === 4003) {
-        return;
-      }
+      // Stop reconnect for auth errors or offline
+      if ([4001, 4003].includes(event.code) || !navigator.onLine) return;
 
-      if (!navigator.onLine) {
-        return;
-      }
-
-      // Exponential backoff
+      // Exponential backoff reconnect
       const timeout = Math.min(30000, 2000 * 2 ** reconnectAttempts.current);
       reconnectAttempts.current++;
 
-      reconnectTimer.current = window.setTimeout(() => {
-        connect();
-      }, timeout);
+      reconnectTimer.current = window.setTimeout(connect, timeout);
     };
   };
 
   useEffect(() => {
-    connect();
-    const handleOnline = () => {
+    // Only connect if no active socket exists
+    if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
       connect();
-    };
+    }
 
+    const handleOnline = () => {
+      // Reconnect only if socket is closed
+      if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
+        connect();
+      }
+    };
     window.addEventListener("online", handleOnline);
 
     return () => {
       window.removeEventListener("online", handleOnline);
-
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-
       wsRef.current?.close();
     };
   }, [path, RECIPIENT]);
