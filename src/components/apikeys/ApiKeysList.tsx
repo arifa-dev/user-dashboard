@@ -54,7 +54,7 @@ export default function ApiKeysList() {
   const getKeyHeading = (key: typeof allKeys[0]) => {
     const type = key.key_type.toLowerCase(); // 'live' or 'test'
     const client = key.client.toLowerCase(); // 'web' or 'mobile'
-    const typeLabel = type === "live" ? "Production" : "Test";
+    const typeLabel = type === "arifa_live" ? "Production" : "Test";
     const clientLabel = client === "mobile" ? "Mobile" : "Web";
     return `${typeLabel} ${clientLabel} Key`;
   };

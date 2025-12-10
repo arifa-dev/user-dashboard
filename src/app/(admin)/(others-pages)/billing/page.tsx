@@ -14,8 +14,13 @@ export default function BillingPage() {
     : "N/A";
 
   const renewalDate = subscription?.next_billing_date
-    ? new Date(subscription.next_billing_date).toDateString()
-    : "N/A";
+  ? new Date(subscription.next_billing_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  : "N/A";
+
 
   const daysRemaining = subscription?.days_remaining ?? "N/A";
 
