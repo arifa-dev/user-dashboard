@@ -22,7 +22,7 @@ const developerPlan = {
     "Unlimited requests",
     "Test Api Keys (mobile & web)",
     "Api Key Active for 4hrs",
-    "One-time generate",
+    "One-time generated",
   ],
 };
 
