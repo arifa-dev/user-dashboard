@@ -7,37 +7,26 @@ import ChartTab from "../common/ChartTab";
 // Dynamically import the chart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-// Notification data
-const notificationsData = {
-  weekly: {
-    dates: ["01 Dec", "02 Dec", "03 Dec", "04 Dec", "05 Dec", "06 Dec", "07 Dec"],
-    success: [12, 18, 20, 15, 22, 25, 30],
-    failed: [2, 1, 3, 4, 2, 1, 0],
-    pending: [5, 4, 3, 6, 4, 5, 3],
-  },
-  monthly: {
-    dates: ["Week 1", "Week 2", "Week 3", "Week 4"],
-    success: [70, 80, 90, 85],
-    failed: [5, 3, 2, 4],
-    pending: [10, 8, 5, 6],
-  },
-  quarterly: {
-    dates: ["Q1", "Q2", "Q3", "Q4"],
-    success: [200, 250, 220, 270],
-    failed: [15, 10, 8, 12],
-    pending: [20, 18, 25, 22],
-  },
-};
+// Type for incoming data
+interface AnalyticsData {
+  weekly: { dates: string[]; success: number[]; failed: number[]; pending: number[] };
+  monthly: { dates: string[]; success: number[]; failed: number[]; pending: number[] };
+  quarterly: { dates: string[]; success: number[]; failed: number[]; pending: number[] };
+}
 
-export default function NotificationsStatisticsChart() {
+interface NotificationsStatisticsChartProps {
+  analyticsData: AnalyticsData;
+}
+
+export default function NotificationsStatisticsChart({ analyticsData }: NotificationsStatisticsChartProps) {
   const [range, setRange] = useState<"weekly" | "monthly" | "quarterly">("weekly");
 
   // Chart series (memoized to update when range changes)
   const series = useMemo(() => [
-    { name: "Success", data: notificationsData[range].success },
-    { name: "Failed", data: notificationsData[range].failed },
-    { name: "Pending", data: notificationsData[range].pending },
-  ], [range]);
+    { name: "Success", data: analyticsData[range]?.success || [] },
+    { name: "Failed", data: analyticsData[range]?.failed || [] },
+    { name: "Pending", data: analyticsData[range]?.pending || [] },
+  ], [range, analyticsData]);
 
   // Chart options (memoized, dynamic x-axis categories)
   const options: ApexOptions = useMemo(() => ({
@@ -51,7 +40,7 @@ export default function NotificationsStatisticsChart() {
     tooltip: { enabled: true },
     xaxis: {
       type: "category",
-      categories: notificationsData[range].dates,
+      categories: analyticsData[range]?.dates || [],
       axisBorder: { show: false },
       axisTicks: { show: false },
       tooltip: { enabled: false },
@@ -61,7 +50,7 @@ export default function NotificationsStatisticsChart() {
       title: { text: "Notifications", style: { fontSize: "12px" } },
     },
     legend: { show: true, position: "top", horizontalAlign: "left" },
-  }), [range]);
+  }), [range, analyticsData]);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white px-5 pt-5 pb-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">

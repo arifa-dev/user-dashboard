@@ -27,9 +27,12 @@ export const useWebSocket = (path: string) => {
     }
   }, []);
 
-  const TOKEN = "arifa_test:4e89be23CVCP";
+  const TOKEN = "arifa_test:4e89be23CVCP"; 
+
+  const TOKEN1 = "arifa_test:8b7dcdfbGID1";
   const CLIENT = "web";
   const WS_URL = "wss://notifications.arifa.dev/ws";
+  const WS_URL1 = "ws://127.0.0.1:8081/ws";
 
 
 
@@ -53,6 +56,8 @@ export const useWebSocket = (path: string) => {
 
     ws.onmessage = (event) => {
       setData(event.data);
+
+      console.log("OFFLINE", event.data)
     };
 
     ws.onerror = (err) => {
