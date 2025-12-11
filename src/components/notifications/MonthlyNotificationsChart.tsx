@@ -6,6 +6,7 @@ import { MoreDotIcon } from "@/icons";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
+import { formatNumber } from "@/utils";
 
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -31,15 +32,16 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
   }
 
   // Compute total notifications per month
-  const totalPerMonth = monthlyData?.dates.map((_, idx) => {
-    const s = monthlyData?.success[idx] || 0;
-    const f = monthlyData?.failed?.[idx] || 0;
-    const p = monthlyData?.pending?.[idx] || 0;
-    return s + f + p;
-  }) || [];
+  const totalPerMonth =
+    monthlyData?.dates.map((_, idx) => {
+      const s = monthlyData?.success[idx] || 0;
+      const f = monthlyData?.failed?.[idx] || 0;
+      const p = monthlyData?.pending?.[idx] || 0;
+      return s + f + p;
+    }) || [];
 
   // Extract only month name (strip year if exists)
-  const monthsOnly = monthlyData?.dates.map(dateStr => dateStr.split(" ")[0]) || [];
+  const monthsOnly = monthlyData?.dates.map((dateStr) => dateStr.split(" ")[0]) || [];
 
   const options: ApexOptions = {
     colors: ["#465fff"],
@@ -60,12 +62,19 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
       axisTicks: { show: false },
     },
     legend: { show: true, position: "top", horizontalAlign: "left", fontFamily: "Outfit" },
-    yaxis: { title: { text: undefined } },
+    yaxis: {
+      title: { text: undefined },
+      labels: {
+        formatter: (val: number) => formatNumber(val), // Format y-axis numbers
+      },
+    },
     grid: { yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
     tooltip: {
       x: { show: false },
-      y: { formatter: (val: number) => `${val} notifications` },
+      y: {
+        formatter: (val: number) => `${formatNumber(val)} notifications`, // Format tooltip numbers
+      },
     },
   };
 

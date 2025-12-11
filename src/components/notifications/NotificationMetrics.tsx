@@ -2,6 +2,7 @@
 import React from "react";
 import Badge from "../ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, TimeIcon } from "@/icons";
+import { formatNumber } from "@/utils";
 
 interface INotificationMetrics {
   total_success: number | string;
@@ -32,7 +33,7 @@ export const NotificationMetrics: React.FC<INotificationMetrics> = ({
           <div>
             <span className="text-sm text-gray-500 dark:text-gray-400">Success</span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              {total_success}
+              {formatNumber(Number(total_success))}
             </h4>
           </div>
 
@@ -53,7 +54,7 @@ export const NotificationMetrics: React.FC<INotificationMetrics> = ({
           <div>
             <span className="text-sm text-gray-500 dark:text-gray-400">Pending</span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              {total_pending}
+              {formatNumber(Number(total_pending))}
             </h4>
           </div>
 

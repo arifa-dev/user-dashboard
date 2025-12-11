@@ -19,30 +19,32 @@ export default function NotificationDropdown() {
 
   const { data, isConnected } = useWebSocket("/connect");
 
+
   // Sound reference
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (!data) return;
+      if (!data) return;
 
-    try {
-      const parsed: Notification = JSON.parse(data);
-
-      if (parsed.message_type === "subscription_transaction"){
-          // Store incoming messages
-          setNotifications((prev) => [parsed, ...prev]);
-          setHasUnread(true);
-
-          // Play sound on new message
-          if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => {});
-          }
+      if (
+        typeof data !== "object" ||
+        !data.message_type ||
+        !data.created_at
+      ) {
+        return;
       }
-    } catch (err) {
-      console.error("Invalid websocket message:", err);
-    }
+
+      if (data.message_type === "subscription_transaction") {
+        setNotifications((prev) => [data, ...prev]);
+        setHasUnread(true);
+
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(() => {});
+        }
+      }
   }, [data]);
+
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);

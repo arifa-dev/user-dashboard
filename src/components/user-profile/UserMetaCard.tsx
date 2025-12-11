@@ -6,12 +6,12 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import Image from "next/image";
-import { useUser } from "@/context/UserContext";
+import { useUserInfo } from "@/hooks/useUserInfo";
 
 
 export default function UserMetaCard() {
   const { isOpen, closeModal } = useModal();
-  const { user} = useUser();
+  const { user} = useUserInfo();
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");

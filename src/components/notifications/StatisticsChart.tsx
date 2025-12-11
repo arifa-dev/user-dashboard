@@ -1,8 +1,10 @@
 "use client";
+
 import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import ChartTab from "../common/ChartTab";
+import { formatNumber } from "@/utils";
 
 // Dynamically import the chart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -37,7 +39,12 @@ export default function NotificationsStatisticsChart({ analyticsData }: Notifica
     markers: { size: 0, strokeColors: "#fff", strokeWidth: 2, hover: { size: 6 } },
     grid: { xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } } },
     dataLabels: { enabled: false },
-    tooltip: { enabled: true },
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: (val: number) => formatNumber(val), // Format tooltip numbers
+      },
+    },
     xaxis: {
       type: "category",
       categories: analyticsData[range]?.dates || [],
@@ -46,7 +53,10 @@ export default function NotificationsStatisticsChart({ analyticsData }: Notifica
       tooltip: { enabled: false },
     },
     yaxis: {
-      labels: { style: { fontSize: "12px", colors: ["#6B7280"] } },
+      labels: {
+        style: { fontSize: "12px", colors: ["#6B7280"] },
+        formatter: (val: number) => formatNumber(val), // Format y-axis labels
+      },
       title: { text: "Notifications", style: { fontSize: "12px" } },
     },
     legend: { show: true, position: "top", horizontalAlign: "left" },

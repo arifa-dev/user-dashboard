@@ -5,11 +5,11 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useUser } from "@/context/UserContext";
+import { useUserInfo } from "@/hooks/useUserInfo";
 
 export default function UserInfoCard() {
   const { isOpen, closeModal } = useModal();
-  const { user } = useUser();
+  const {user} = useUserInfo()
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");

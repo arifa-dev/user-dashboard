@@ -4,11 +4,11 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { useUser } from "@/context/UserContext";
+import { useUserInfo } from "@/hooks/useUserInfo";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const {user} = useUser();
+  const {user} = useUserInfo();
 
 function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
   e.stopPropagation();
