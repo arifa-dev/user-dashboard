@@ -13,7 +13,7 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })
 
 type MonthlyNotificationsChartProps = {
   monthlyData?: {
-    dates: string[]; // e.g., ["Dec 2025", "Jan 2026"]
+    dates: string[]; // e.g., ["Dec 2025", "Dec 2025", "Jan 2026"]
     success: number[];
     failed?: number[];
     pending?: number[];
@@ -31,18 +31,32 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
     setIsOpen(false);
   }
 
-  // Compute total notifications per month
-  const totalPerMonth =
-    monthlyData?.dates.map((_, idx) => {
-      const s = monthlyData?.success[idx] || 0;
-      const f = monthlyData?.failed?.[idx] || 0;
-      const p = monthlyData?.pending?.[idx] || 0;
-      return s + f + p;
-    }) || [];
+  // -------------------------------
+  // MERGE DUPLICATE MONTHS
+  // -------------------------------
+  const mergedMap: Record<string, number> = {};
 
-  // Extract only month name (strip year if exists)
-  const monthsOnly = monthlyData?.dates.map((dateStr) => dateStr.split(" ")[0]) || [];
+  if (monthlyData?.dates) {
+    monthlyData.dates.forEach((dateStr, idx) => {
+      const monthName = dateStr.split(" ")[0]; // Extract "Dec" from "Dec 2025"
 
+      const s = monthlyData.success[idx] || 0;
+      const f = monthlyData.failed?.[idx] || 0;
+      const p = monthlyData.pending?.[idx] || 0;
+
+      const total = s + f + p;
+
+      // Sum totals by month
+      mergedMap[monthName] = (mergedMap[monthName] || 0) + total;
+    });
+  }
+
+  const mergedMonths = Object.keys(mergedMap);          // ["Dec", "Jan"]
+  const mergedTotals = Object.values(mergedMap);        // [totalDec, totalJan]
+
+  // -------------------------------
+  // APEX CHART OPTIONS
+  // -------------------------------
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
@@ -57,15 +71,14 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
     dataLabels: { enabled: false },
     stroke: { show: true, width: 4, colors: ["transparent"] },
     xaxis: {
-      categories: monthsOnly,
+      categories: mergedMonths,
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     legend: { show: true, position: "top", horizontalAlign: "left", fontFamily: "Outfit" },
     yaxis: {
-      title: { text: undefined },
       labels: {
-        formatter: (val: number) => formatNumber(val), // Format y-axis numbers
+        formatter: (val: number) => formatNumber(val),
       },
     },
     grid: { yaxis: { lines: { show: true } } },
@@ -73,7 +86,7 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
     tooltip: {
       x: { show: false },
       y: {
-        formatter: (val: number) => `${formatNumber(val)} notifications`, // Format tooltip numbers
+        formatter: (val: number) => `${formatNumber(val)} notifications`,
       },
     },
   };
@@ -81,10 +94,13 @@ export default function MonthlyNotificationsChart({ monthlyData }: MonthlyNotifi
   const series = [
     {
       name: "Total Notifications",
-      data: totalPerMonth,
+      data: mergedTotals,
     },
   ];
 
+  // -------------------------------
+  // RENDER
+  // -------------------------------
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
