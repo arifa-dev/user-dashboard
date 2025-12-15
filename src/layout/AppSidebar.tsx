@@ -42,6 +42,14 @@ const navItems: NavItem[] = [
       { name: "Generate", path: "/generate-apikeys", pro: false },
     ],
   },
+    {
+    icon: <BoltIcon/>,
+    name: "Tools",
+    path: "/sdks",
+    subItems: [
+      { name: "SDKs", path: "/sdks", pro: false },
+    ],
+  },
   {
     icon: <DollarLineIcon/>,
     name: "Pricing Table",
@@ -56,14 +64,6 @@ const navItems: NavItem[] = [
     icon: <PageIcon  />,
     name: "Documentation",
     path: "https://notifications.arifa.dev/docs",
-  },
-    {
-    icon: <BoltIcon/>,
-    name: "Tools",
-    path: "/sdks",
-    subItems: [
-      { name: "SDKs", path: "/sdks", pro: false },
-    ],
   }
 ];
 
