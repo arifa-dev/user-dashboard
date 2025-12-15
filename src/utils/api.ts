@@ -2,7 +2,7 @@ const AUTH_BASE_URL = "https://auth.arifa.dev/bff_v001";
 const COMMERCE_BASE_URL = "https://notifications.arifa.dev/bff_v001";
 
 const AUTH_BASE_URL1 = "http://127.0.0.1:8000/bff_v001";
-const COMMERCE_BASE_URL1 = "http://127.0.0.1:8081/bff_v001";
+const COMMERCE_BASE_URL1= "http://127.0.0.1:8081/bff_v001";
 
 export async function auth_api(
   endpoint: string,

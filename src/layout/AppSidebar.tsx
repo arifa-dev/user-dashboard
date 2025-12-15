@@ -10,12 +10,12 @@ import {
   ChevronDownIcon,
   HorizontaLDots,
   PlugInIcon,
-  UserCircleIcon,
   DocsIcon,
   PageIcon,
-  BoltIcon
+  BoltIcon,
 
 } from "../icons/index";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
 
 type NavItem = {
   name: string;

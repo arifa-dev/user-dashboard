@@ -4,7 +4,7 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
 import Link from "next/link";
 
-export default function Profile() {
+export default function SDKPage() {
   return (
     <>
       <PageBreadcrumb pageTitle="SDKs" />
