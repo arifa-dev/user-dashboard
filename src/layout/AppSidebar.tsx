@@ -12,7 +12,8 @@ import {
   PlugInIcon,
   UserCircleIcon,
   DocsIcon,
-  PageIcon
+  PageIcon,
+  BoltIcon
 
 } from "../icons/index";
 
@@ -33,7 +34,7 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <PlugInIcon/>,
+    icon: <PlugInIcon />,
     name: "ApiKeys",
     path: "/apikeys",
     subItems: [
@@ -52,14 +53,17 @@ const navItems: NavItem[] = [
     path: "/transactions",
   },
    {
-    icon: <UserCircleIcon />,
-    name: "Profile",
-    path: "/profile",
-  },
-   {
-    icon: <PageIcon />,
+    icon: <PageIcon  />,
     name: "Documentation",
     path: "https://notifications.arifa.dev/docs",
+  },
+    {
+    icon: <BoltIcon/>,
+    name: "Tools",
+    path: "/sdks",
+    subItems: [
+      { name: "SDKs", path: "/sdks", pro: false },
+    ],
   }
 ];
 
