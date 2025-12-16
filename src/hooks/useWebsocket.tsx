@@ -30,7 +30,7 @@ export const useWebSocket = (path: string) => {
   const TOKEN1 = "arifa_test:8b7dcdfbLBGK";
   const CLIENT = "web";
   const WS_URL= "wss://notifications.arifa.dev/ws";
-  const WS_URL1= "ws://127.0.0.1:8081/ws";
+  const WS_URL1 = "ws://127.0.0.1:8081/ws";
 
   // SAFE PARSER — handles ALL message formats
   const safeParse = (input: any) => {

@@ -21,7 +21,7 @@ export default function SDKPage() {
         <div className="space-y-6">
           <ComponentCard
             title="arifa-notifications"
-            desc="A React notification component with WebSocket support for real-time notifications from Arifa.Allows developers to easily integrate notifications in any React app and fully control how notifications are renderedz"
+            desc="A React notification component with WebSocket support for real-time notifications from Arifa.Allows developers to easily integrate notifications in any React app and fully control how notifications are rendered"
             >
                 <Link
                     href="https://www.npmjs.com/package/arifa-notifications"

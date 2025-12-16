@@ -21,28 +21,35 @@ export default function SignInForm() {
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+      e.preventDefault();
+      setLoading(true);
+      setError(null);
 
-        try {
-          const { data, response } = await auth_api("/auth/jwt/create/", {
-            method: "POST",
-            body: JSON.stringify({ email, password }),
-          });
+  try {
+    const { data } = await auth_api("/auth/jwt/create/", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
 
-          if (data?.access) {
-            localStorage.setItem("accessToken", data.access);
-            router.push("/"); 
-          } else {
-            setError(data?.detail || "Login failed. Please check your credentials.");
-          }
-        } catch (err: any) {
-          setError(err.message || "Failed to login. Please try again.");
-        } finally {
-          setLoading(false);
+        if (data?.access) {
+          localStorage.setItem("accessToken", data.access);
+          const redirectTo =
+            localStorage.getItem("postLoginRedirect") || "/";
+
+          localStorage.removeItem("postLoginRedirect");
+          router.replace(redirectTo);
+        } else {
+          setError(
+            data?.detail || "Login failed. Please check your credentials."
+          );
         }
-  };
+      } catch (err: any) {
+        setError(err.message || "Failed to login. Please try again.");
+      } finally {
+        setLoading(false);
+    }
+ };
+
 
 
   return (
