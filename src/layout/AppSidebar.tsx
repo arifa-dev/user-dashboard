@@ -63,7 +63,7 @@ const navItems: NavItem[] = [
    {
     icon: <PageIcon  />,
     name: "Documentation",
-    path: "https://notifications.arifa.dev/docs",
+    path: "https://documentation.arifa.dev/",
   }
 ];
 

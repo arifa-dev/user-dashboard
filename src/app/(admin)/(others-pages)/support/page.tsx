@@ -37,7 +37,7 @@ export default function SupportPage() {
             desc="Access our detailed documentation and step-by-step guides to help you integrate and use our services efficiently."
           >
             <Link
-              href="https://notifications.arifa.dev/docs/"
+              href="https://documentation.arifa.dev/"
               target="_blank"
               className="text-indigo-600 hover:underline dark:text-indigo-400 text-sm"
             >
