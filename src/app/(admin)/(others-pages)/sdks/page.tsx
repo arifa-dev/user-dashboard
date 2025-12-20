@@ -19,6 +19,19 @@ export default function SDKPage() {
         </p>
 
         <div className="space-y-6">
+           <ComponentCard
+            title="arifa-client"
+            desc="JavaScript/TypeScript client SDK for Arifa realtime event delivery service.
+            Allows you to subscribe user via websocket and  listen to events, and send notifications/events using HTTP."
+            >
+                <Link
+                    href="https://www.npmjs.com/package/arifa-client"
+                    target="_blank"
+                    className="mb-2 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
+                    arifa-client
+                </Link>
+          </ComponentCard>
           <ComponentCard
             title="arifa-notifications"
             desc="A React notification component with WebSocket support for real-time notifications from Arifa.Allows developers to easily integrate notifications in any React app and fully control how notifications are rendered"
