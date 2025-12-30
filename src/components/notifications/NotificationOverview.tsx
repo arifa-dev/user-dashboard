@@ -106,7 +106,7 @@ export default function NotificationsOverview({ data }: { data: any }) {
 
         {/* Chart */}
         <div className="relative">
-          <div className="max-h-[330px]">
+          <div className="h-[210px]">
             <ReactApexChart options={options} series={series} type="radialBar" height={330} />
           </div>
 

@@ -5,6 +5,7 @@ import NotificationsOverview from "@/components/notifications/NotificationOvervi
 import MonthlyNotificationsChart from "@/components/notifications/MonthlyNotificationsChart";
 import StatisticsChart from "@/components/notifications/StatisticsChart"; 
 import { useUserAnalyticsData } from "@/hooks/useUserAnalyticsData";
+import ConcurrentConnections from "@/components/concurrent-connections/ConcurrentConnections";
 
 export default function HomePage() {
   const { data, loading, error } = useUserAnalyticsData();
@@ -15,24 +16,26 @@ export default function HomePage() {
   return (
     <div className="grid grid-cols-12 gap-4 md:gap-6">
 
+      {/* Left column: metrics & monthly chart */}
       <div className="col-span-12 space-y-6 xl:col-span-7">
+        <ConcurrentConnections />
         <NotificationMetrics 
           total_pending={data?.total_pending ?? "..."} 
           total_success={data?.total_success ?? "..."}
           pending_growth={data?.pending_growth || "..."}
           success_growth={data?.success_growth || "..."}
+          delivered_count={data?.total_delivered || "..."}
         />
-
-        {/* Pass monthly data to MonthlyNotificationsChart */}
-        <MonthlyNotificationsChart monthlyData={data?.monthly_data} />
       </div>
 
+      {/* Right column: notifications overview */}
       <div className="col-span-12 xl:col-span-5">
         <NotificationsOverview data={data} />
       </div>
       
-      <div className="col-span-12">
-        {/* Pass weekly/monthly/quarterly data to StatisticsChart */}
+      {/* Full width: statistics chart */}
+      <div className="grid col-span-12 gap-6">
+        <MonthlyNotificationsChart monthlyData={data?.monthly_data} />
         <StatisticsChart 
           analyticsData={{
             weekly: data?.weekly_data || { dates: [], success: [], failed: [], pending: [] },
@@ -40,7 +43,9 @@ export default function HomePage() {
             quarterly: data?.quarterly_data || { dates: [], success: [], failed: [], pending: [] },
           }} 
         />
+        
       </div> 
+
     </div>
   );
 }

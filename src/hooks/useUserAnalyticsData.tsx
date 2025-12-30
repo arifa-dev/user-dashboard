@@ -14,6 +14,7 @@ type UserAnalytics = {
   total_success: number;
   total_failed: number;
   total_pending: number;
+  total_delivered: number;
   success_growth: string | null;
   failed_growth: string | null;
   pending_growth: string | null;
