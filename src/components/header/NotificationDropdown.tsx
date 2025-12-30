@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { FiBell } from "react-icons/fi";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { useWebSocket } from "@/hooks/useWebsocket";
+import { useWebSocketContext } from "@/context/WebsocketContext";
 
 type Notification = {
   message: string;
@@ -17,7 +17,7 @@ export default function NotificationDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hasUnread, setHasUnread] = useState(false);
 
-  const { data, isConnected } = useWebSocket("/connect");
+  const { data, isConnected } = useWebSocketContext();
 
 
   // Sound reference

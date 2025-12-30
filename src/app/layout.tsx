@@ -4,6 +4,7 @@ import './globals.css';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { UserProvider } from '@/context/UserContext';
+import { WebSocketProvider } from '@/context/WebsocketContext';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -19,7 +20,9 @@ export default function RootLayout({
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <ThemeProvider>
           <UserProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+           <WebSocketProvider>
+             <SidebarProvider>{children}</SidebarProvider>
+           </WebSocketProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

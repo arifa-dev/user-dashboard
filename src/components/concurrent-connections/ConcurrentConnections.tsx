@@ -1,10 +1,10 @@
 "use client";
 
 import { FiActivity } from "react-icons/fi";
-import { useWebSocket } from "@/hooks/useWebsocket";
+import { useWebSocketContext } from "@/context/WebsocketContext";
 
 export default function ConcurrentConnections() {
-  const { data, isConnected } = useWebSocket("/connect");
+  const { data, isConnected } = useWebSocketContext();
 
   // Show loading state if data is not available
   if (!data) {

@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = {
@@ -7,29 +9,40 @@ type JwtPayload = {
   iat: number;
 };
 
-export const useWebSocket = (path: string) => {
+type WebSocketContextType = {
+  data: any;
+  isConnected: boolean;
+};
+
+const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
+
+type WebSocketProviderProps = {
+  children: ReactNode;
+  path?: string;
+};
+
+export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProviderProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [data, setData] = useState<any>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
-
   const internetOnline = useRef(true);
   const internetTimer = useRef<number | null>(null);
 
   /* -------- CONFIG -------- */
-  const HEALTH_URL = "https://postman-echo.com/get";
+  const HEALTH_URL = "https://notifications.arifa.dev/health";
   const MAX_BACKOFF = 60_000;
-
-  const TOKEN = "arifa_test:4e89be23CVCP"; 
-  const TOKEN1 = "arifa_test:8b7dcdfbUE54"; 
-  const CLIENT = "mobile"; 
-  const WS_URL= "wss://notifications.arifa.dev/ws"; 
+  const TOKEN = "arifa_test:4e89be23CVCP";
+  const TOKEN1 = "arifa_test:8b7dcdfbYIO0"
+  const CLIENT = "web";
+  const WS_URL = "wss://notifications.arifa.dev/ws";
   const WS_URL1 = "ws://127.0.0.1:8081/ws";
 
   /* -------- RECIPIENT -------- */
   const RECIPIENT = useMemo(() => {
+    if (typeof window === "undefined") return ""; // skip on server
     const token = localStorage.getItem("accessToken");
     if (!token) return "";
     try {
@@ -39,7 +52,8 @@ export const useWebSocket = (path: string) => {
     }
   }, []);
 
-  /* -------- SAFE PARSER -------- */
+  
+
   const safeParse = (input: any) => {
     try {
       if (typeof input === "object") return input;
@@ -51,17 +65,12 @@ export const useWebSocket = (path: string) => {
     }
   };
 
-  /* -------- REAL INTERNET CHECK -------- */
   const checkInternet = async (): Promise<boolean> => {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000);
 
-      await fetch(HEALTH_URL, {
-        method: "GET",
-        cache: "no-store",
-        signal: controller.signal,
-      });
+      await fetch(HEALTH_URL, { method: "GET", cache: "no-store", signal: controller.signal });
 
       clearTimeout(timeout);
       return true;
@@ -70,7 +79,6 @@ export const useWebSocket = (path: string) => {
     }
   };
 
-  /* -------- INTERNET MONITOR -------- */
   const startInternetMonitor = () => {
     const update = async () => {
       const online = await checkInternet();
@@ -95,16 +103,11 @@ export const useWebSocket = (path: string) => {
     internetTimer.current = window.setInterval(update, 5000);
   };
 
-  /* -------- CONNECT -------- */
   const connect = () => {
-    if (!RECIPIENT) return;
-    if (!internetOnline.current) return;
+    if (!RECIPIENT || !internetOnline.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const ws = new WebSocket(
-      `${WS_URL}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`
-    );
-
+    const ws = new WebSocket(`${WS_URL}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -114,9 +117,7 @@ export const useWebSocket = (path: string) => {
 
     ws.onmessage = (event) => {
       const parsed = safeParse(event.data);
-      if (parsed?.event) {
-        setData(parsed.event);
-      }
+      if (parsed?.event) setData(parsed.event);
     };
 
     ws.onclose = () => {
@@ -124,29 +125,17 @@ export const useWebSocket = (path: string) => {
       scheduleReconnect();
     };
 
-    ws.onerror = () => {
-      ws.close();
-    };
+    ws.onerror = () => ws.close();
   };
 
-  /* -------- RECONNECT -------- */
   const scheduleReconnect = () => {
     if (!internetOnline.current) return;
-
-    const base = Math.min(
-      MAX_BACKOFF,
-      1000 * 2 ** reconnectAttempts.current
-    );
-
+    const base = Math.min(MAX_BACKOFF, 1000 * 2 ** reconnectAttempts.current);
     const jitter = Math.random() * 1000;
-    const timeout = base + jitter;
-
     reconnectAttempts.current++;
-
-    reconnectTimer.current = window.setTimeout(connect, timeout);
+    reconnectTimer.current = window.setTimeout(connect, base + jitter);
   };
 
-  /* -------- LIFECYCLE -------- */
   useEffect(() => {
     startInternetMonitor();
     connect();
@@ -158,5 +147,12 @@ export const useWebSocket = (path: string) => {
     };
   }, [path, RECIPIENT]);
 
-  return { data, isConnected };
+  return <WebSocketContext.Provider value={{ data, isConnected }}>{children}</WebSocketContext.Provider>;
+};
+
+/* -------- HOOK TO USE CONTEXT -------- */
+export const useWebSocketContext = (): WebSocketContextType => {
+  const context = useContext(WebSocketContext);
+  if (!context) throw new Error("useWebSocketContext must be used within a WebSocketProvider");
+  return context;
 };
