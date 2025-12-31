@@ -9,7 +9,7 @@ import React, {
   useMemo,
   ReactNode,
 } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = {
   user_id: string;
@@ -36,14 +36,14 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
-  const internetOnline = useRef(true);
-  const internetTimer = useRef<number | null>(null);
 
   /* -------- CONFIG -------- */
-  const HEALTH_URL = "https://notifications.arifa.dev/health";
-  const MAX_BACKOFF = 60_000;
-  const TOKEN = "arifa_test:4e89be23CVCP";
-  const CLIENT = "web";
+  const MAX_RECONNECTS = 5;
+  const MAX_BACKOFF = 60_000; 
+  const TOKEN = "arifa_test:4e89be23CVCP"; 
+  const TOKEN1 = "arifa_test:8b7dcdfbYY0O"; 
+  const CLIENT = "web"; 
+  const WS_URL1 = "ws://127.0.0.1:8081/ws"; 
   const WS_URL = "wss://notifications.arifa.dev/ws";
 
   /* -------- RECIPIENT -------- */
@@ -70,45 +70,10 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
     }
   };
 
-  const checkInternet = async (): Promise<boolean> => {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
-      await fetch(HEALTH_URL, { method: "HEAD", cache: "no-store", signal: controller.signal });
-      clearTimeout(timeout);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const startInternetMonitor = () => {
-    const update = async () => {
-      const online = await checkInternet();
-
-      if (online !== internetOnline.current) {
-        internetOnline.current = online;
-
-        if (online) {
-          reconnectAttempts.current = 0;
-          connect();
-        } else {
-          wsRef.current?.close();
-          setIsConnected(false);
-        }
-      }
-    };
-
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    internetTimer.current = window.setInterval(update, 5000);
-  };
-
   /* -------- WEBSOCKET CONNECTION -------- */
   const connect = () => {
-    if (!RECIPIENT || !internetOnline.current) return;
-    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (!RECIPIENT) return;
+    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) return;
 
     const ws = new WebSocket(`${WS_URL}${path}?api_key=${TOKEN}&client=${CLIENT}&recipient=${RECIPIENT}`);
     wsRef.current = ws;
@@ -134,20 +99,20 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
   };
 
   const scheduleReconnect = () => {
-    if (!internetOnline.current) return;
+    if (reconnectAttempts.current >= MAX_RECONNECTS) return;
+
     const base = Math.min(MAX_BACKOFF, 1000 * 2 ** reconnectAttempts.current);
     const jitter = Math.random() * 1000;
+
     reconnectAttempts.current++;
     reconnectTimer.current = window.setTimeout(connect, base + jitter);
   };
 
   useEffect(() => {
-    startInternetMonitor();
     connect();
 
     return () => {
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-      if (internetTimer.current) clearInterval(internetTimer.current);
       wsRef.current?.close();
       wsRef.current = null;
     };
