@@ -1,7 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo, ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  ReactNode,
+} from "react";
+import {jwtDecode} from "jwt-decode";
 
 type JwtPayload = {
   user_id: string;
@@ -35,14 +43,12 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
   const HEALTH_URL = "https://notifications.arifa.dev/health";
   const MAX_BACKOFF = 60_000;
   const TOKEN = "arifa_test:4e89be23CVCP";
-  const TOKEN1 = "arifa_test:8b7dcdfbYIO0"
   const CLIENT = "web";
   const WS_URL = "wss://notifications.arifa.dev/ws";
-  const WS_URL1 = "ws://127.0.0.1:8081/ws";
 
   /* -------- RECIPIENT -------- */
   const RECIPIENT = useMemo(() => {
-    if (typeof window === "undefined") return ""; // skip on server
+    if (typeof window === "undefined") return "";
     const token = localStorage.getItem("accessToken");
     if (!token) return "";
     try {
@@ -52,8 +58,7 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
     }
   }, []);
 
-  
-
+  /* -------- UTILITIES -------- */
   const safeParse = (input: any) => {
     try {
       if (typeof input === "object") return input;
@@ -69,9 +74,7 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000);
-
-      await fetch(HEALTH_URL, { method: "GET", cache: "no-store", signal: controller.signal });
-
+      await fetch(HEALTH_URL, { method: "HEAD", cache: "no-store", signal: controller.signal });
       clearTimeout(timeout);
       return true;
     } catch {
@@ -99,10 +102,10 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
     update();
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
-
     internetTimer.current = window.setInterval(update, 5000);
   };
 
+  /* -------- WEBSOCKET CONNECTION -------- */
   const connect = () => {
     if (!RECIPIENT || !internetOnline.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -125,7 +128,9 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
       scheduleReconnect();
     };
 
-    ws.onerror = () => ws.close();
+    ws.onerror = () => {
+      ws.close();
+    };
   };
 
   const scheduleReconnect = () => {
@@ -144,6 +149,7 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       if (internetTimer.current) clearInterval(internetTimer.current);
       wsRef.current?.close();
+      wsRef.current = null;
     };
   }, [path, RECIPIENT]);
 
