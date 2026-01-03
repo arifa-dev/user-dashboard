@@ -1,12 +1,15 @@
 "use client";
 
-import { auth_api } from "@/utils/api";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { auth_api } from "@/utils/api";
 
-export  function useSignOut() {
+export function useSignOut() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const signOut = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
 
@@ -19,8 +22,6 @@ export  function useSignOut() {
           // Only remove token if logout succeeded
           localStorage.removeItem("accessToken");
           localStorage.removeItem("postLoginRedirect");
-
-          // Redirect to signin page
           router.replace("/signin");
         } else {
           console.error("Logout failed:", response.status);
@@ -32,8 +33,10 @@ export  function useSignOut() {
     } catch (err) {
       console.error("Logout error:", err);
       router.replace("/signin");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return signOut;
+  return { signOut, loading };
 }
