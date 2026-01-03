@@ -4,6 +4,7 @@ const COMMERCE_BASE_URL = "https://notifications.arifa.dev/bff_v001";
 const AUTH_BASE_URL1 = "http://127.0.0.1:8000/bff_v001";
 const COMMERCE_BASE_URL1 = "http://127.0.0.1:8081/bff_v001";
 
+
 export async function auth_api(
   endpoint: string,
   options: RequestInit = {}
@@ -45,6 +46,7 @@ export async function auth_api(
   return { response, data };
 }
 
+
 export async function notification_api(
   endpoint: string,
   options: RequestInit = {}
@@ -65,9 +67,26 @@ export async function notification_api(
     credentials: "include",
   });
 
-  // Parse JSON data here
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
 
-  // Return both response and data
+  //  Check for token revoked/expired message
+  if (data?.message === "Token revoked or expired" && data?.success === false) {
+    // Clear token
+    localStorage.removeItem("accessToken");
+
+    // Redirect to sign-in
+    if (typeof window !== "undefined") {
+      const redirectTo = window.location.pathname;
+      localStorage.setItem("postLoginRedirect", redirectTo);
+      window.location.href = "/signin";
+    }
+  }
+
   return { response, data };
 }
+
