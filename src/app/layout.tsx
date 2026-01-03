@@ -19,13 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-       <ThemeProvider>
+        <MaintenancePage />
+      {/*  <ThemeProvider>
           <UserProvider>
            <WebSocketProvider>
              <SidebarProvider>{children}</SidebarProvider>
            </WebSocketProvider>
           </UserProvider>
-        </ThemeProvider>
+        </ThemeProvider> */}
       </body>
     </html>
   );
