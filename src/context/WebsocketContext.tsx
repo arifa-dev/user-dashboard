@@ -40,8 +40,8 @@ export const WebSocketProvider = ({ children, path = "/connect" }: WebSocketProv
   /* -------- CONFIG -------- */
   const MAX_RECONNECTS = 5;
   const MAX_BACKOFF = 60_000; 
-  const TOKEN1 = "arifa_test:4e89be23CVCP"; 
-  const TOKEN = "arifa_test:8b7dcdfbLZVR"; 
+  const TOKEN = "arifa_test:4e89be23CVCP"; 
+  const TOKEN1 = "arifa_test:8b7dcdfbLZVR"; 
   const CLIENT = "web"; 
   const WS_URL1 = "ws://127.0.0.1:8081/ws"; 
   const WS_URL = "wss://notifications.arifa.dev/ws";
