@@ -19,7 +19,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-       {/*  <MaintenancePage /> */}
+         <MaintenancePage />
+       {/*
       <ThemeProvider>
           <UserProvider>
            <WebSocketProvider>
@@ -27,6 +28,7 @@ export default function RootLayout({
            </WebSocketProvider>
           </UserProvider>
         </ThemeProvider>
+         */}
       </body>
     </html>
   );
